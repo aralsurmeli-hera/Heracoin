@@ -18,5 +18,9 @@ contract AccountAdministrator is Ownable{
     function getUserFromAddress(address a) public onlyOwner returns(bytes32){
         return userAddresses[a];
     } 
+    
+    function removeUserFromAddress(address a) public onlyOwner{
+        delete userAddresses[a];
+    }
 
 }

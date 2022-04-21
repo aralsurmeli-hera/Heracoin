@@ -27,20 +27,22 @@ contract EMRDatabase is Ownable, AccessControl {
     //Create a counter for EMR Ids
     using Counters for Counters.Counter;
     Counters.Counter private _EMRIds;
-
-    //An array of all EMRs
     
     //Create index mapping for EMRs to IDs
-    mapping(int => EMR) private idsToEMRs;
+    mapping(uint => EMR) private idsToEMRs;
     
     //Creates a mapping of patients to the indexes of their EMRs in the emrDatabase
-    mapping (address => int[]) private ownersToEMRs;
+    mapping (address => uint[]) private ownersToEMRs;
     
     //Creates a mapping of addresses to the indexes of EMRs in the ermDatabase
-    mapping (address => int[]) private accessorsToEMRs;
+    mapping (address => uint[]) private accessorsToEMRs;
     
-    //Creates a mapping of IPFS hashes to EMRs
-    mapping (string => EMR) private hashesToEMRS;
+    //Creates a mapping of IPFS Image hashes to EMRs
+    mapping (string => EMR) private imageHashesToEMRS;
+    
+    //Creates a mapping of IPFS Data hashes to EMRs
+    mapping (string => EMR) private dataHashesToEMRS;
+    
     
     
     //Creates an event for a new record being created
@@ -63,22 +65,27 @@ contract EMRDatabase is Ownable, AccessControl {
         bytes32 record_status;
         uint256 record_date;
         uint256 publish_date;
-        bytes32 ifps_hash;
+        bytes32 ipfs_image_hash;
+        bytes32 ipfs_data_hash;
     }
 
     //Creates an 
-    function createEMR(bytes32 _record_type, bytes32 _record_status, uint256 _record_date, bytes32 _ifps_hash) public returns(bool){
-        EMR emr = new EMR();
-        emr.id = emrDatabase.length;
+    function createEMR(bytes32 _record_type, bytes32 _record_status, uint256 _record_date, bytes32 _ipfs_image_hash, bytes32 _ipfs_data_hash) public returns(bool){
+        _EMRIds.increment();
+        uint newId = _EMRIds.current();
+        
+        //Create EMR
+        EMR storage emr = idToEMR[newId];
+        
+        //Add the provided attributes to the EMR
+        emr.id = newId;
         emr.owner = msg.sender;
         emr.record_status = _record_status;
         emr.record_date = _record_date;
         emr.record_type = _record_type;
-        emr.ifps_hash = _ifps_hash;
-        
-        //Adds the EMR to the Database
-        emrDatabase.push(emr);
-        
+        emr.ifps_image_hash = _ifps_image_hash;
+        emr.ifps_data_hash = _ifps_image_hash;
+
         //Maps the new EMR to the Patient Address
         ownersToEMRs[msg.sender].push(emr.id);
         
@@ -86,14 +93,18 @@ contract EMRDatabase is Ownable, AccessControl {
         emit EMRCreated(msg.sender, emr.id);
         
         //Rewards the patient for creating an EMR
-        sendRewardForEmrCreation(msg.sender);s
+        sendRewardForEmrCreation(msg.sender);
     }
 
-    function getOwnedEMR(int id) public returns(EMR) {
-        return emrDatabase[id];
+    function getOwnedEMR(uint id) public returns(EMR memory) {
+        return idsToEMRs[id];
     }
     
-    function getOwnedEMRsArray(address patient) public returns(EMR[]){
+    function getOwnedEMRsArray(address patient) public returns(EMR[] memory){
+        require(
+            msg.sender == patient,
+            "Only owner can call this."
+            );
         return ownersToEMRs[patient];
     }
     
@@ -102,7 +113,12 @@ contract EMRDatabase is Ownable, AccessControl {
     }
     
     function getEMR(string memory hash) public view returns(EMR memory){
-      return hashToEMR[hash];
+        EMR returnedEMR = hashToEMR[hash];
+        require(
+            msg.sender == returnedEMR.owner,
+            "Only owner can call this."
+            );
+        return returnedEMR;     
     }
     
     

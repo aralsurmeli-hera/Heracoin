@@ -4,6 +4,8 @@ pragma solidity ^0.6.0;
 import "./HeraCoin.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0-solc-0.7/contracts/access/AccessControl.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0-solc-0.7/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0-solc-0.7/contracts/utils/Counters.sol";
+
 
 
 contract EMRDatabase is Ownable, AccessControl {
@@ -11,21 +13,40 @@ contract EMRDatabase is Ownable, AccessControl {
     //Instantiates the HeraCoin Contract
     HeraCoin heracoin;
     
-    //Initializes the owner of this EMRDatabase
-    address owner;
+    //Initializes the owner of this EMRDatabase contract
+    address public owner;
 
     //Initializes the reward amount
     uint256 public reward_ammount;
 
-    constructor(address heracoin_address) public {
+    constructor(address memory heracoin_address) public {
         heracoin = new HeraCoin(heracoin_address);
         owner = msg.sender;
     }
+    
+    //Create a counter for EMR Ids
+    using Counters for Counters.Counter;
+    Counters.Counter private _EMRIds;
 
+    //An array of all EMRs
+    
+    //Create index mapping for EMRs to IDs
+    mapping(int => EMR) private idsToEMRs;
+    
+    //Creates a mapping of patients to the indexes of their EMRs in the emrDatabase
+    mapping (address => int[]) private ownersToEMRs;
+    
+    //Creates a mapping of addresses to the indexes of EMRs in the ermDatabase
+    mapping (address => int[]) private accessorsToEMRs;
+    
+    //Creates a mapping of IPFS hashes to EMRs
+    mapping (string => EMR) private hashesToEMRS;
+    
+    
     //Creates an event for a new record being created
-    event EmrCreated(address patient, int record_id);
+    event EMRCreated(address patient, int record_id);
     event SentRewardTokens(uint256 amount, address fromAccount, uint256 totalBalance);
-    event EmrAccessed(address add);
+    event EMRAccessed(address add);
     
 
     //Creates Modifier that checks for the owner of the EMR
@@ -44,15 +65,6 @@ contract EMRDatabase is Ownable, AccessControl {
         uint256 publish_date;
         bytes32 ifps_hash;
     }
-
-    //An array of all EMRs
-    EMR[] emrDatabase; 
-    
-    //Creates a mapping of patients to the indexes of their EMRs in the emrDatabase
-    mapping (address => int[]) ownersToEMRs;
-    
-    //Creates a mapping of addresses to the indexes of EMRs in the ermDatabase
-    mapping (address => int[]) accessorsToEMRs;
 
     //Creates an 
     function createEMR(bytes32 _record_type, bytes32 _record_status, uint256 _record_date, bytes32 _ifps_hash) public returns(bool){
@@ -88,6 +100,14 @@ contract EMRDatabase is Ownable, AccessControl {
     function getEMRHash(EMR emr) public isEMROwner(msg.sender,emr){
         return emr.ifps_hash;
     }
+    
+    function getEMR(string memory hash) public view returns(EMR memory){
+      return hashToEMR[hash];
+    }
+    
+    
+    
+    //Functions for reward payments
     
     function setRewardAmount(uint256 reward) public isOwner(msg.sender) returns (bool){
         reward_ammount = reward;

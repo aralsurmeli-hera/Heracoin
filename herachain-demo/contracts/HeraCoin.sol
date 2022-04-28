@@ -5,6 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract HeraCoin is ERC20 {
     constructor() public ERC20("HERACoin", "HERA") {
-        _mint(msg.sender, 1000000 * (10**uint256(decimals())));
+        _mint(msg.sender, 10000000);
     }
 }

@@ -11,8 +11,9 @@ contract EMRDatabase is Ownable, AccessControl {
     IERC20 private heracoin;
 
     //Initializes the reward amount
-    uint256 public reward_amount;
+    uint256 public reward_amount = 10;
 
+    //Constructor takes in the rewarder contract
     constructor(IERC20 _heracoin) {
         heracoin = _heracoin;
     }
@@ -44,7 +45,7 @@ contract EMRDatabase is Ownable, AccessControl {
         address toAccount,
         uint256 totalBalance
     );
-    event EMRAccessed(address add);
+    event EMRAccessed(address accessor, uint256 record_id);
 
     //Creates Modifier that checks for the owner of the EMR
     modifier isEMROwner(address add, EMR calldata emr) {
@@ -83,6 +84,7 @@ contract EMRDatabase is Ownable, AccessControl {
         emr.owner = msg.sender;
         emr.record_status = _record_status;
         emr.record_date = _record_date;
+        emr.publish_date = block.timestamp;
         emr.record_type = _record_type;
         emr.ipfs_image_hash = _ipfs_image_hash;
         emr.ipfs_data_hash = _ipfs_image_hash;
@@ -95,6 +97,10 @@ contract EMRDatabase is Ownable, AccessControl {
 
         //Rewards the patient for creating an EMR
         sendRewardForEmrCreation(msg.sender);
+    }
+
+    function getNumberOwnedEMRs() public view returns (uint256 count) {
+        return ownersToEMRs[msg.sender].length;
     }
 
     function getOwnedEMRsArray() public returns (uint256[] memory) {
@@ -122,8 +128,12 @@ contract EMRDatabase is Ownable, AccessControl {
         return true;
     }
 
+    function getRewardAmount() public view returns (uint256) {
+        return reward_amount;
+    }
+
     function sendRewardForEmrCreation(address patient) private {
-        heracoin.transferFrom(address(this), patient, reward_amount);
+        heracoin.transfer(patient, reward_amount);
         emit SentRewardTokens(
             reward_amount,
             address(this),

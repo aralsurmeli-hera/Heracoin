@@ -6,10 +6,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./HeraCoinRewarder.sol";
+import "./EMRContractDatabase.sol";
 
+//Defines an EMR as a Smart Contract that is Ownable
 contract EMRContract is Ownable {
     //Reward Contract
-    HeraCoinRewarder rewarder;
+    HeraCoinRewarder private rewarder;
+
+    //EMR Contract Database
+    EMRContractDatabase private EMRdatabase;
 
     //EMR Components
     address public patient;
@@ -40,9 +45,11 @@ contract EMRContract is Ownable {
         uint256 _record_date,
         string memory _ipfs_image_hash,
         string memory _ipfs_data_hash,
-        HeraCoinRewarder _rewarder
+        HeraCoinRewarder _rewarder,
+        EMRContractDatabase _database
     ) {
         rewarder = _rewarder;
+        database = _database;
         patient = msg.sender;
         record_status = _record_status;
         record_date = _record_date;
@@ -52,7 +59,17 @@ contract EMRContract is Ownable {
         ipfs_data_hash = _ipfs_image_hash;
 
         rewarder.sendRewardForEmrCreation(msg.sender);
+        database.addEMR(address(this));
         emit EMRCreated(msg.sender, address(this));
+    }
+
+    //Returns a tuple of the image and data hash on IPFS (Only EMR Owner)
+    function getEMRHashes(EMR calldata emr)
+        public
+        onlyOwner
+        returns (string memory, string memory)
+    {
+        return (ipfs_image_hash, ipfs_data_hash);
     }
 
     function getRecordType() public view onlyOwner returns (string memory) {

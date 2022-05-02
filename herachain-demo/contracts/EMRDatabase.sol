@@ -4,31 +4,28 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./HeraCoinRewarder.sol";
 
-contract EMRDatabase is Ownable, AccessControl {
-    //Instantiates the HeraCoin Contract
-    IERC20 private heracoin;
+contract EMRDatabase {
+    //Instantiates the HeraCoinRewarder Contract that will be paying out rewards
+    HeraCoinRewarder private rewarder;
 
-    //Initializes the reward amount
-    uint256 public reward_amount = 10;
-
-    //Constructor takes in the rewarder contract
-    constructor(IERC20 _heracoin) {
-        heracoin = _heracoin;
+    //Constructor requires the address of the rewarder contract
+    constructor(HeraCoinRewarder _rewarder) {
+        rewarder = _rewarder;
     }
 
-    //Create a counter for EMR Ids
+    //Create a counter for EMR Ids that we will use to assign an ID to a new EMR
     using Counters for Counters.Counter;
     Counters.Counter private _EMRIds;
 
-    //Create index mapping for EMRs to IDs
+    //Create mapping for EMRs to IDs
     mapping(uint256 => EMR) private idsToEMRs;
 
-    //Creates a mapping of patients to the indexes of their EMRs in the emrDatabase
+    //Creates a mapping of patients addresses to an array of the indexes of their EMRs in the emrDatabase
     mapping(address => uint256[]) private ownersToEMRs;
 
-    //Creates a mapping of addresses to the indexes of EMRs in the ermDatabase
+    //Creates a mapping of accessor addresses to an array of the indexes of their EMRs in the emrDatabase
     mapping(address => uint256[]) private accessorsToEMRs;
 
     // //Creates a mapping of IPFS Image hashes to EMRs
@@ -47,7 +44,7 @@ contract EMRDatabase is Ownable, AccessControl {
     );
     event EMRAccessed(address accessor, uint256 record_id);
 
-    //Creates Modifier that checks for the owner of the EMR
+    //Creates Modifier that checks for the owner of the EMR (Functions with this modifier will only execute if the owner of the EMR is calling them)
     modifier isEMROwner(address add, EMR calldata emr) {
         require(emr.owner == add);
         _;
@@ -65,7 +62,7 @@ contract EMRDatabase is Ownable, AccessControl {
         string ipfs_data_hash;
     }
 
-    //Creates an
+    //Creates an EMR object when passed in Record Type, Status, Date, IPFS Hashes
     function createEMR(
         string memory _record_type,
         string memory _record_status,
@@ -76,7 +73,7 @@ contract EMRDatabase is Ownable, AccessControl {
         _EMRIds.increment();
         uint256 newId = _EMRIds.current();
 
-        //Create EMR
+        //Create EMR struct and add to the IDs to EMRs mapping
         EMR storage emr = idsToEMRs[newId];
 
         //Add the provided attributes to the EMR
@@ -95,18 +92,28 @@ contract EMRDatabase is Ownable, AccessControl {
         //Emits the creation event to the blockchain
         emit EMRCreated(msg.sender, emr.id);
 
-        //Rewards the patient for creating an EMR
-        sendRewardForEmrCreation(msg.sender);
+        //Rewards the patient for creating an EMR using the Rewarder contract
+        rewarder.sendRewardForEmrCreation(msg.sender);
     }
 
+    //Returns an number of owned EMRs for the address that calls the function
     function getNumberOwnedEMRs() public view returns (uint256 count) {
         return ownersToEMRs[msg.sender].length;
     }
 
-    function getOwnedEMRsArray() public returns (uint256[] memory) {
+    //Returns an array of the IDs of owned EMRs for the address that calls the function
+    function getOwnedEMRsArray() public view returns (uint256[] memory) {
         return ownersToEMRs[msg.sender];
     }
 
+    //Returns a the EMR struct given the ID (requires the owner of the EMR calls this, or will revert)
+    function getEMRById(uint256 _id) public view returns (EMR memory) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR;
+    }
+
+    //Returns a tuple of the image and data hash on IPFS (Only EMR Owner)
     function getEMRHashes(EMR calldata emr)
         public
         isEMROwner(msg.sender, emr)
@@ -115,30 +122,45 @@ contract EMRDatabase is Ownable, AccessControl {
         return (emr.ipfs_image_hash, emr.ipfs_data_hash);
     }
 
-    function getEMRById(uint256 _id) public view returns (EMR memory) {
+    //Returns the record type for EMR given ID
+    function getRecordType(uint256 _id) public view returns (string memory) {
         EMR memory returnedEMR = idsToEMRs[_id];
         require(msg.sender == returnedEMR.owner, "Only owner can call this.");
-        return returnedEMR;
+        return returnedEMR.record_type;
     }
 
-    //Functions for reward payments
-
-    function setRewardAmount(uint256 reward) public onlyOwner returns (bool) {
-        reward_amount = reward;
-        return true;
+    //Returns the record status for EMR given ID
+    function getRecordStatus(uint256 _id) public view returns (string memory) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR.record_status;
     }
 
-    function getRewardAmount() public view returns (uint256) {
-        return reward_amount;
+    //Returns the image hash for EMR given ID
+    function getImageIPFSHash(uint256 _id) public view returns (string memory) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR.ipfs_image_hash;
     }
 
-    function sendRewardForEmrCreation(address patient) private {
-        heracoin.transfer(patient, reward_amount);
-        emit SentRewardTokens(
-            reward_amount,
-            address(this),
-            patient,
-            heracoin.balanceOf(address(this))
-        );
+    //Returns the data hash for EMR given ID
+    function getDataIPFSHash(uint256 _id) public view returns (string memory) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR.ipfs_data_hash;
+    }
+
+    //Returns the record date for EMR given ID
+    function getRecordDate(uint256 _id) public view returns (uint256) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR.record_date;
+    }
+
+    //Returns the publish date for EMR given ID
+    function getPublishDate(uint256 _id) public view returns (uint256) {
+        EMR memory returnedEMR = idsToEMRs[_id];
+        require(msg.sender == returnedEMR.owner, "Only owner can call this.");
+        return returnedEMR.publish_date;
     }
 }

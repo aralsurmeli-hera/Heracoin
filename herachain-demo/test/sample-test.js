@@ -11,13 +11,28 @@ describe("EMR Database Tests", function () {
 
   });
 
+  it("Should create a HeraCoin Rewarder Contract", async function () {
+    const HeraCoin = await ethers.getContractFactory("HeraCoin");
+    const heracoin = await HeraCoin.deploy();
+    const heracoin_token = heracoin.deployed();
+
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
+  });
+
   it("Should create an EMR Contract", async function () {
     const HeraCoin = await ethers.getContractFactory("HeraCoin");
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
 
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
     const EMRDatabase = await ethers.getContractFactory("EMRDatabase");
-    const database = await EMRDatabase.deploy((await heracoin_token).address);
+    const database = await EMRDatabase.deploy((await rewarder_address).address);
     await database.deployed();
   });
 
@@ -26,11 +41,15 @@ describe("EMR Database Tests", function () {
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
 
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
     const EMRDatabase = await ethers.getContractFactory("EMRDatabase");
-    const database = await EMRDatabase.deploy((await heracoin_token).address);
+    const database = await EMRDatabase.deploy((await rewarder_address).address);
     const database_address = await database.deployed();
 
-    await heracoin.transfer(database_address.address, 1000);
+    await heracoin.transfer(rewarder_address.address, 1000);
 
     await database.createEMR("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
     const emr = await database.getEMRById(1);
@@ -43,27 +62,30 @@ describe("EMR Database Tests", function () {
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
 
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
     const EMRDatabase = await ethers.getContractFactory("EMRDatabase");
-    const database = await EMRDatabase.deploy((await heracoin_token).address);
+    const database = await EMRDatabase.deploy((await rewarder_address).address);
     const database_address = await database.deployed();
 
-    await heracoin.transfer(database_address.address, 1000);
+    await heracoin.transfer(rewarder_address.address, 1000);
+
 
     await database.createEMR("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
     const emr1 = await database.getEMRById(1);
     expect(emr1.id).to.equal(1);
     expect(emr1.record_type).to.equal("test");
 
-
-    await database.createEMR("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
+    await database.createEMR("test2", "test2", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
     const emr2 = await database.getEMRById(2);
     expect(emr2.id).to.equal(2);
-    expect(emr2.record_type).to.equal("test");
+    expect(emr2.record_type).to.equal("test2");
 
 
     const owned_emrs_count = await database.getNumberOwnedEMRs();
     expect(owned_emrs_count).to.equal(2);
-
   });
 
   it("Should transfer heracoin to the EMR creator", async function () {
@@ -75,18 +97,22 @@ describe("EMR Database Tests", function () {
 
     var owner_balance = await heracoin.balanceOf(owner.getAddress());
 
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
     const EMRDatabase = await ethers.getContractFactory("EMRDatabase");
-    const database = await EMRDatabase.deploy((await heracoin_token).address);
+    const database = await EMRDatabase.deploy((await rewarder_address).address);
     const database_address = await database.deployed();
 
-    await heracoin.transfer(database_address.address, 1000);
+    await heracoin.transfer(rewarder_address.address, 1000);
     owner_balance = await heracoin.balanceOf(owner.getAddress());
 
-    var contract_balance = await heracoin.balanceOf(await database_address.address);
+    var contract_balance = await heracoin.balanceOf(await rewarder_address.address);
 
     await database.connect(patient).createEMR("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
     patient_balance = await heracoin.balanceOf(patient.getAddress());
-    contract_balance = await heracoin.balanceOf(database_address.address);
+    contract_balance = await heracoin.balanceOf(rewarder_address.address);
 
     expect(patient_balance).to.equal(10);
     expect(contract_balance).to.equal(990);
@@ -99,11 +125,16 @@ describe("EMR Database Tests", function () {
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
 
+
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
     const EMRDatabase = await ethers.getContractFactory("EMRDatabase");
-    const database = await EMRDatabase.deploy((await heracoin_token).address);
+    const database = await EMRDatabase.deploy((await rewarder_address).address);
     const database_address = await database.deployed();
 
-    await heracoin.transfer(database_address.address, 1000);
+    await heracoin.transfer(rewarder_address.address, 1000);
     owner_balance = await heracoin.balanceOf(owner.getAddress());
 
     await database.connect(patient1).createEMR("test1", "test1", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");

@@ -169,6 +169,8 @@ describe("EMR Contract Tests", function () {
   });
 
   it("Should create an EMR Contract", async function () {
+    const [owner] = await ethers.getSigners();
+
     const HeraCoin = await ethers.getContractFactory("HeraCoin");
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
@@ -180,13 +182,19 @@ describe("EMR Contract Tests", function () {
     await heracoin.transfer(rewarder_address.address, 1000);
 
     const EMRDatabase = await ethers.getContractFactory("EMRContractDatabase");
-    const database = await EMRDatabase.deploy();
+    const database = await EMRDatabase.deploy(rewarder_address.address);
     const database_address = await database.deployed();
 
-    const emr = await ethers.getContractFactory("EMRContract");
-    const emr_deploy = await emr.deploy("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", (await rewarder_address).address, (await database_address).address);
+    await database_address.createEMR("test", "test", 1650505906, "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P", "QmNS4xrK3FT9c2FxocxqGpJxWHWXxf5dzv72sritQbkP3P");
+    
+    const owned_emrs_count = await database.getNumberOwnedEMRs();
+    expect(owned_emrs_count).to.equal(1);
 
-    expect(await emr_deploy.getRecordType()).to.equal("test");
+    const EMRContractFactory = await ethers.getContractFactory("EMRContract");
+    const emr = await database_address.getEMRById(0);
+    const emr_contract = await EMRContractFactory.attach(emr);
+
+    expect(await emr_contract.getRecordType()).to.equal("test");
   });
 
   it("Should return an array of EMRs owned by this address", async function () {

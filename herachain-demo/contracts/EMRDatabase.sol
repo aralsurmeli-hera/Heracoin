@@ -10,6 +10,17 @@ contract EMRDatabase {
     //Instantiates the HeraCoinRewarder Contract that will be paying out rewards
     HeraCoinRewarder private rewarder;
 
+    //Events
+    event EMRCreated(address patient, uint256 emr);
+    event EMRAccessed(address accesor, uint256 emr);
+    event SentRewardTokens(
+        uint256 amount,
+        address fromAccount,
+        address toAccount,
+        uint256 totalBalance
+    );
+
+
     //Constructor requires the address of the rewarder contract
     constructor(HeraCoinRewarder _rewarder) {
         rewarder = _rewarder;
@@ -33,16 +44,6 @@ contract EMRDatabase {
 
     // //Creates a mapping of IPFS Data hashes to EMRs
     // mapping(string => EMR) private dataHashesToEMRS;
-
-    //Creates an event for a new record being created
-    event EMRCreated(address patient, uint256 record_id);
-    event SentRewardTokens(
-        uint256 amount,
-        address fromAccount,
-        address toAccount,
-        uint256 totalBalance
-    );
-    event EMRAccessed(address accessor, uint256 record_id);
 
     //Creates Modifier that checks for the owner of the EMR (Functions with this modifier will only execute if the owner of the EMR is calling them)
     modifier isEMROwner(address add, EMR calldata emr) {
@@ -84,7 +85,7 @@ contract EMRDatabase {
         emr.publish_date = block.timestamp;
         emr.record_type = _record_type;
         emr.ipfs_image_hash = _ipfs_image_hash;
-        emr.ipfs_data_hash = _ipfs_image_hash;
+        emr.ipfs_data_hash = _ipfs_data_hash;
 
         //Maps the new EMR to the Patient Address
         ownersToEMRs[msg.sender].push(emr.id);
@@ -94,6 +95,8 @@ contract EMRDatabase {
 
         //Rewards the patient for creating an EMR using the Rewarder contract
         rewarder.sendRewardForEmrCreation(msg.sender);
+
+        return true;
     }
 
     //Returns an number of owned EMRs for the address that calls the function
@@ -115,7 +118,7 @@ contract EMRDatabase {
 
     //Returns a tuple of the image and data hash on IPFS (Only EMR Owner)
     function getEMRHashes(EMR calldata emr)
-        public
+        public view
         isEMROwner(msg.sender, emr)
         returns (string memory, string memory)
     {

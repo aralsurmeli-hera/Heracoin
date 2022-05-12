@@ -4,14 +4,10 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./HeraCoinRewarder.sol";
 import "./EMRContractDatabase.sol";
 
 //Defines an EMR as a Smart Contract that is Ownable
 contract EMRContract is Ownable {
-    //Reward Contract
-    HeraCoinRewarder private rewarder;
 
     //EMR Contract Database
     EMRContractDatabase private EMRdatabase;
@@ -25,16 +21,6 @@ contract EMRContract is Ownable {
     string ipfs_image_hash;
     string ipfs_data_hash;
 
-    //Events
-    event EMRCreated(address patient, address emr);
-    event SentRewardTokens(
-        uint256 amount,
-        address fromAccount,
-        address toAccount,
-        uint256 totalBalance
-    );
-    event EMRAccessed(address accesor, address emr);
-
     //Mapping of Accessors to approval
     mapping(address => bool) approvedAccessors;
 
@@ -44,27 +30,19 @@ contract EMRContract is Ownable {
         string memory _record_status,
         uint256 _record_date,
         string memory _ipfs_image_hash,
-        string memory _ipfs_data_hash,
-        HeraCoinRewarder _rewarder,
-        EMRContractDatabase _database
+        string memory _ipfs_data_hash
     ) {
-        rewarder = _rewarder;
-        EMRdatabase = _database;
         patient = msg.sender;
         record_status = _record_status;
         record_date = _record_date;
         publish_date = block.timestamp;
         record_type = _record_type;
         ipfs_image_hash = _ipfs_image_hash;
-        ipfs_data_hash = _ipfs_image_hash;
-
-        rewarder.sendRewardForEmrCreation(msg.sender);
-        EMRdatabase.addEMR(msg.sender, address(this));
-        emit EMRCreated(msg.sender, address(this));
+        ipfs_data_hash = _ipfs_data_hash;
     }
 
     //Returns a tuple of the image and data hash on IPFS (Only EMR Owner)
-    function getEMRHashes()
+    function getEMRHashes() view
         public
         onlyOwner
         returns (string memory, string memory)

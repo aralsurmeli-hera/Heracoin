@@ -43,11 +43,16 @@ contract EMRContractDatabase {
         string memory _record_status,
         uint256 _record_date,
         string memory _ipfs_image_hash,
-        string memory _ipfs_data_hash)
+        string memory _ipfs_data_hash
+        )
         public
         returns (bool)
     {
+        //The database can build the EMRContract
         EMRContract new_emr = new EMRContract(_record_type, _record_status, _record_date, _ipfs_image_hash, _ipfs_data_hash);
+        
+        //Then transfer its ownership to the patient
+        new_emr.transferOwnership(msg.sender);
 
         uint256 newId = _EMRIds.current();
         _EMRIds.increment();
@@ -61,7 +66,7 @@ contract EMRContractDatabase {
         emit EMRCreated(msg.sender, newId);
 
         //Rewards the patient for creating an EMR using the Rewarder contract
-        rewarder.sendRewardForEmrCreation(msg.sender);
+        rewarder.sendRewardForEmrCreation(payable(msg.sender));
         return true;
     }
 

@@ -31,8 +31,7 @@ contract EMRContract is Ownable {
         uint256 _record_date,
         string memory _ipfs_image_hash,
         string memory _ipfs_data_hash
-    ) {
-        patient = msg.sender;
+        ) {
         record_status = _record_status;
         record_date = _record_date;
         publish_date = block.timestamp;

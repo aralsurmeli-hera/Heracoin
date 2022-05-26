@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+body{
+	font-family: 'Roboto', sans-serif;
+}
+
+.logo{
+    max-width: 250px;
+}
+
+.hera-purple{
+	color: #7E3E98;
+}
+
+h1, h2, h3, h4, h5, h6{
+	font-weight: bold;
+}
+
+.metamask-btn{
+	background-color: #f6851a;
+	color: white;
+	box-shadow: 5px 5px 1px #e2e2e2;
+}
+
+.metamask-btn:hover{
+	background-color: #753d16;
+	color: white;
+	box-shadow: 0px 0px 0px #e2e2e2;
+}
+
+.margin-zero{
+	margin: 0 auto;
+}
+
+.mt-20{
+	margin-top: 20px;
+}
+
+.mt-40{
+	margin-top: 40px;
+}
+
+.mr-20{
+	margin-right: 20px;
+}
+
+.form-control, .form-select{
+	border: 1px solid #ececec;
+	box-shadow: 5px 5px 1px #e2e2e2;
+}
+
+.btn-primary{
+	background-color: #7E3E98;
+	color: white;
+	border: 0px;
+	box-shadow: 5px 5px 1px #e2e2e2;
+}
+
+.btn-primary:hover{
+	background-color: #6e3784;
+	border: 0px;
+	box-shadow: 0px 0px 0px #e2e2e2;
+}

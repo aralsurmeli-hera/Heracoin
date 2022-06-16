@@ -6,7 +6,6 @@ import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { AccountContext } from './context';
-// import emrdatabase from './emrdatabase.js'
 // import emr from './emr.js'
 import {
   databaseAddress, ownerAddress
@@ -79,7 +78,7 @@ function App({ Component, pageProps }) {
       const added = await client.add(file)
       return added.path
     } catch (err) {
-      console.log('error: ', err)
+      console.log('Could not upload image: ', err)
     }
   }
 
@@ -89,26 +88,32 @@ function App({ Component, pageProps }) {
       const added = await client.add(JSON.stringify(record.description))
       return added.path
     } catch (err) {
-      console.log('error: ', err)
+      console.log('Could not upload Data: ', err)
     }
   }
 
   const convertToUnix = (date) => {
     const dateFormat = new Date(date);
-    let unixTimestamp = Math.floor(date.getTime() / 1000)
+    let unixTimestamp = Math.floor(dateFormat.getTime() / 1000)
     // console.log(unixTimestamp)
     return unixTimestamp
   }
 
 
-  async function createNewRecord() {
+  async function createNewRecord(e) {
     /* saves post to ipfs then anchors to smart contract */
+    if (file == null) {
+      alert("Please upload a Medical Record Image to add to HeraChain")
+      return
+    }
     if (!recordType || !recordDate) return
     const image_hash = await saveImageToIpfs()
-    console.log(image_hash)
-    console.log(data_hash)
+    console.log("Image has been saved to " + image_hash)
     const data_hash = await saveDataToIpfs()
+    console.log("Data has been saved to " + data_hash)
     await createEMR(image_hash, data_hash)
+    alert("Medical Record Successfully Added to HeraChain")
+
     // router.push(`/`)
   }
 
@@ -123,6 +128,7 @@ function App({ Component, pageProps }) {
       console.log('contract: ', contract)
       try {
         const unixdate = convertToUnix(record.recordDate)
+        console.log("Record Date: " + unixdate)
         const val = await contract.createEMR(record.recordType, "Active", unixdate, image_hash, data_hash)
         /* optional - wait for transaction to be confirmed before rerouting */
         /* await provider.waitForTransaction(val.hash) */
@@ -134,7 +140,18 @@ function App({ Component, pageProps }) {
 
   }
 
+  function onFormChange(e) {
+    setRecord(() => ({ ...record, [e.target.name]: e.target.value }))
+    console.log(record)
+  }
 
+  const afterSubmission = (event) => {
+    event.preventDefault();
+    setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
+    document.getElementById("form").reset();
+    setFile(null)
+
+  }
 
   return (
     <><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" /><div className="container">
@@ -150,14 +167,14 @@ function App({ Component, pageProps }) {
         <h4 className="form-label hera-purple">Upload a file</h4>
 
         {/* <FileForm onSubmit={createEMR} /> */}
-        <form onSubmit={createNewRecord}>
+        <form id="form" onSubmit={afterSubmission}>
           <input className="form-control mt-20" type="file" onChange={(e) => setFile(e.target.files[0])} />
 
           <label className="form-label mt-20">Description</label>
-          <textarea className="form-control" rows="3" />
+          <textarea name='description' className="form-control" rows="3" onChange={onFormChange} />
 
           <label className="form-label mt-20">Record Type</label>
-          <select className="form-select">
+          <select className="form-select" name='recordType' onChange={onFormChange}>
             <option selected>Record Type</option>
             <option value="1">Personal ID</option>
             <option value="2">Health Report</option>
@@ -166,9 +183,9 @@ function App({ Component, pageProps }) {
 
           <label className="form-label mt-20">Record Date (MM/DD/YYYY)</label>
 
-          <input className="form-control" type="text" />
+          <input className="form-control" name='recordDate' type="text" onChange={onFormChange} />
 
-          <button type="submit" className="btn btn-primary mt-20">Submit</button>
+          <button type="submit" className="btn btn-primary mt-20" onClick={createNewRecord}>Submit</button>
         </form>
 
       </div>

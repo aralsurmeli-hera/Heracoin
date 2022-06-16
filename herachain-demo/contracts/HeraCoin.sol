@@ -6,6 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract HeraCoin is ERC20, Ownable {
     constructor() public ERC20("HERACoin", "HERA") {
-        _mint(msg.sender, 10000000);
+        _mint(msg.sender, 1000000000000000000);
     }
 }

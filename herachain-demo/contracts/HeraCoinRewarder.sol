@@ -10,7 +10,7 @@ contract HeraCoinRewarder is Ownable {
     IERC20 heracoin;
 
     //the default reward amount
-    uint256 public reward_amount = 10;
+    uint256 public reward_amount = 100000000000000;
 
     //On-chain event when a reward was sent
     event SentRewardTokens(

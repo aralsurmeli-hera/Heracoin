@@ -1,7 +1,11 @@
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import Accordion from 'react-bootstrap/Accordion';
+import Card from 'react-bootstrap/Card';
+import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
 import { create } from 'ipfs-http-client'
-import { useState, useRef, useEffect } from 'react' // new
+import React, { useState, useRef, useEffect, useContext } from 'react' // new
 import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
@@ -10,8 +14,16 @@ import { AccountContext } from './context';
 import {
   databaseAddress, ownerAddress
 } from './config'
+import heralogo from './img/logo-hera.png'
+import metamasklogo from './img/logo-metamask.png'
 
 import EMRContractDatabase from './artifacts/contracts/EMRContractDatabase.sol/EMRContractDatabase.json'
+import EMRContract from './artifacts/contracts/EMRContract.sol/EMRContract.json'
+
+import { Interface } from 'ethers/lib/utils';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
+import RecordComponent from './RecordComponent';
 
 //IPFS endpoint
 const client = create('https://ipfs.infura.io:5001/api/v0')
@@ -19,11 +31,23 @@ const client = create('https://ipfs.infura.io:5001/api/v0')
 //Initial Empty State of Medical Record
 const initialState = { description: '', recordType: '', recordDate: '' }
 
+export class Record {
+  constructor(id, type, date, image_hash, data_hash) {
+    this.id = id;
+    this.type = type;
+    this.date = date;
+    this.image_hash = image_hash;
+    this.data_hash = data_hash;
+  }
+}
+
 function App({ Component, pageProps }) {
   const [account, setAccount] = useState(null)
   const [file, setFile] = useState(null)
   const [record, setRecord] = useState(initialState)
   const { description, recordType, recordDate } = record
+  const [ownedRecords, setOwnedRecords] = useState([])
+  let rows = []
 
   // const router = useRouter()
   const fileRef = useRef(null)
@@ -67,6 +91,7 @@ function App({ Component, pageProps }) {
       const accounts = await provider.listAccounts()
       setAccount(accounts[0])
       console.log(provider)
+      getOwnedRecords()
     } catch (err) {
       console.log('error:', err)
     }
@@ -145,22 +170,58 @@ function App({ Component, pageProps }) {
     console.log(record)
   }
 
+  async function getOwnedRecords() {
+    console.log("Getting owned EMRs")
+    setOwnedRecords([])
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
+    let ownedIds = await databaseContract.getOwnedEMRsArray()
+
+    let ownedAddresses = new Array()
+    for (let i = 0; i < ownedIds.length; i++) {
+      let ownedAdd = await databaseContract.getEMRById(ownedIds[i])
+      console.log(ownedIds[i] + " " + ownedAdd)
+      ownedAddresses.push(ownedAdd)
+    }
+
+    let ownedRecs = Array()
+    for (let j = 0; j < ownedAddresses.length; j++) {
+      let emrContract = new ethers.Contract(ownedAddresses[j], EMRContract.abi, signer)
+      let emr: Record = {
+        id: j + 1,
+        type: await emrContract.getRecordType(),
+        date: await emrContract.getRecordDate(),
+        image_hash: await emrContract.getImageIPFSHash(),
+        data_hash: await emrContract.getDataIPFSHash()
+      }
+      setOwnedRecords(ownedRecords => [...ownedRecords, emr]);
+    }
+    console.log(ownedRecords)
+  }
+
   const afterSubmission = (event) => {
     event.preventDefault();
     setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
     document.getElementById("form").reset();
     setFile(null)
-
   }
+
+  useEffect(() => {
+    async function fetchEMRs() {
+      await getOwnedRecords()
+    }
+  }, [])
+
 
   return (
     <><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" /><div className="container">
-      <center><img className="logo mt-40" src={require("./img/logo-hera.png")} alt="hera logo" /><br />
+      <center><img className="logo mt-40" src={heralogo} alt="hera logo" /><br />
         <h2 className="hera-purple">Hera Digital Documentation System</h2>
       </center>
 
-      <center><img className="mt-20 mr-20" src={require('./img/logo-metamask.png')} alt="metamask logo" /><button className="btn metamask-btn mt-20" onClick={connect}>Connect Metamask Wallet</button></center>
-      <center><h6 className="address-display">{account}</h6></center>
+      <center><img className="mt-20 mr-20" src={metamasklogo} alt="metamask logo" /><button className="metamask-btn mt-20" onClick={connect}>Connect Metamask Wallet</button></center>
+      <center><h6 className="address-display">Account: {account}</h6></center>
 
       <div className="mt-20 col-md-6 col-sm-12 margin-zero">
 
@@ -175,10 +236,10 @@ function App({ Component, pageProps }) {
 
           <label className="form-label mt-20">Record Type</label>
           <select className="form-select" name='recordType' onChange={onFormChange}>
-            <option selected>Record Type</option>
-            <option value="1">Personal ID</option>
-            <option value="2">Health Report</option>
-            <option value="3">Vaccination Report</option>
+            <option selected value="" >Record Type</option>
+            <option value="Personal ID">Personal ID</option>
+            <option value="Health Report">Health Report</option>
+            <option value="Vaccination Report">Vaccination Report</option>
           </select>
 
           <label className="form-label mt-20">Record Date (MM/DD/YYYY)</label>
@@ -204,7 +265,10 @@ function App({ Component, pageProps }) {
             </tr>
           </thead>
           <tbody>
-            <tr>
+            {ownedRecords.map(function (record, i) {
+              return <RecordComponent {...record} record={record} key={i}></RecordComponent>;
+            })}
+            {/* <tr>
               <th scope="row">1</th>
               <td>22/12/2020</td>
               <td>Health Report</td>
@@ -271,7 +335,7 @@ function App({ Component, pageProps }) {
                   </div>
                 </div>
               </td>
-            </tr>
+            </tr> */}
           </tbody>
 
 
@@ -288,42 +352,5 @@ function App({ Component, pageProps }) {
 
   );
 }
-
-// class FileForm extends React.Component {
-//   constructor(props) {
-//     super(props);
-//   }
-
-//   render() {
-//     const [file, setFile] = useState("");
-
-
-
-//     return (
-
-//       <form onSubmit={createEMR}>
-//         <input className="form-control mt-20" type="file" value={file} onChange={(e) => selectedFile(e.target.files[0])} />
-
-//         <label className="form-label mt-20">Description</label>
-//         <textarea className="form-control" rows="3" />
-
-//         <label className="form-label mt-20">Record Type</label>
-//         <select className="form-select">
-//           <option selected>Record Type</option>
-//           <option value="1">Personal ID</option>
-//           <option value="2">Health Report</option>
-//           <option value="3">Vaccination Report</option>
-//         </select>
-
-//         <label className="form-label mt-20">Record Date (MM/DD/YYYY)</label>
-
-//         <input className="form-control" type="text" />
-
-//         <button type="submit" className="btn btn-primary mt-20">Submit</button>
-//       </form>
-
-//     );
-//   }
-// }
 
 export default App;

@@ -1,1 +1,1 @@
-# Heracoin
+This readme file will later be updated.

@@ -6,7 +6,7 @@ import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
 import { create } from 'ipfs-http-client'
 import React, { useState, useRef, useEffect, useContext } from 'react' // new
-import { useRouter } from 'next/router'
+// import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { AccountContext } from './context';

@@ -29,10 +29,12 @@ h1, h2, h3, h4, h5, h6{
 	background-color: #f6851a;
 	color: white;
 	box-shadow: 5px 5px 1px #e2e2e2;
+	border: 0px;
+	padding: 10px 20px;
 }
 
 .metamask-btn:hover{
-	background-color: #753d16;
+	background-color: #b5652d;
 	color: white;
 	box-shadow: 0px 0px 0px #e2e2e2;
 }

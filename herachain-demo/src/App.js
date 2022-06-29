@@ -131,14 +131,34 @@ function App({ Component, pageProps }) {
       alert("Please upload a Medical Record Image to add to HeraChain")
       return
     }
-    if (!recordType || !recordDate) return
+    if (!recordType) {
+      alert("Please select a valid Record Type.")
+      return
+    }
+    if (!recordDate) {
+      alert("Please provide a valid Record Date")
+      return
+    }
+    const unix = convertToUnix(recordDate)
+
+    if (isNaN(unix)) {
+      alert("Please provide a valid Record Date")
+      return
+    }
+
     const image_hash = await saveImageToIpfs()
     console.log("Image has been saved to " + image_hash)
     const data_hash = await saveDataToIpfs()
     console.log("Data has been saved to " + data_hash)
-    await createEMR(image_hash, data_hash)
+    var success = await createEMR(image_hash, data_hash)
+    if (!success) {
+      alert("Unable to create an EMR on the blockchain. Please check that you have connected your wallet.")
+      return
+    }
     alert("Medical Record Successfully Added to HeraChain")
-
+    setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
+    document.getElementById("form").reset();
+    setFile(null)
     // router.push(`/`)
   }
 
@@ -158,10 +178,13 @@ function App({ Component, pageProps }) {
         /* optional - wait for transaction to be confirmed before rerouting */
         /* await provider.waitForTransaction(val.hash) */
         console.log('val: ', val)
+        return true;
       } catch (err) {
         console.log('Error: ', err)
+        return false;
       }
     }
+    return false;
 
   }
 
@@ -202,9 +225,9 @@ function App({ Component, pageProps }) {
 
   const afterSubmission = (event) => {
     event.preventDefault();
-    setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
-    document.getElementById("form").reset();
-    setFile(null)
+    // setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
+    // document.getElementById("form").reset();
+    // setFile(null)
   }
 
   useEffect(() => {

@@ -22,6 +22,11 @@ const KOVAN_RPC_URL =
 const POLYGON_MAINNET_RPC_URL =
   process.env.POLYGON_MAINNET_RPC_URL ||
   'https://polygon-mainnet.alchemyapi.io/v2/your-api-key';
+const KLAYTN_BOABAB_RPC_URL = 
+  process.env.KLAYTN_BOABAB_RPC_URL || 'https://api.baobab.klaytn.net:8651/';
+
+
+
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 // optional
 const MNEMONIC = process.env.MNEMONIC || 'Your mnemonic';
@@ -69,6 +74,13 @@ module.exports = {
       //   },
       saveDeployments: true,
       chainId: 1,
+    },
+    boabab: {
+      url: KLAYTN_BOABAB_RPC_URL,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      saveDeployments: true,
+      chainId: 1001,
+      gasPrice: 250000000000,
     },
     polygon: {
       url: POLYGON_MAINNET_RPC_URL,

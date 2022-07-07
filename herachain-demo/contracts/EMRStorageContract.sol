@@ -40,7 +40,7 @@ contract EMRStorageContract is Ownable {
         string memory _ipfs_image_hash,
         string memory _ipfs_data_hash
     ) public onlyOwner {
-
+        emrIdCounter.increment();
         uint256 _recordId = emrIdCounter.current();
         emrs[_recordId] = EMR(
             _record_type,

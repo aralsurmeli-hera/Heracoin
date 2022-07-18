@@ -40,7 +40,6 @@ contract EMRStorageContract is Ownable {
         string memory _ipfs_image_hash,
         string memory _ipfs_data_hash
     ) public onlyOwner {
-        emrIdCounter.increment();
         uint256 _recordId = emrIdCounter.current();
         emrs[_recordId] = EMR(
             _record_type,
@@ -51,13 +50,22 @@ contract EMRStorageContract is Ownable {
             _ipfs_data_hash
 
         );
+        emrIdCounter.increment();
         emrIds.push(_recordId);
-        
+        database.sendRewardForEmrCreation(msg.sender);
+
         emit EMRCreated(owner(), _recordId);
     }
 
     function voidEMR(uint256 _emrID) public onlyOwner {
-        //Remove from _documents;
+        for (uint256 i = 0; i < emrIds.length; i++) {
+            if (emrIds[i] == _emrID) {
+                delete emrIds[i];
+                emrIds[i] = emrIds[emrIds.length - 1];
+                emrIds.pop();
+                break;
+            }
+        }    
     }
 
     function getEMR(uint256 _emrID) public view onlyOwner returns(EMR memory) {

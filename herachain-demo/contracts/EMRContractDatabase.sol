@@ -28,7 +28,7 @@ contract EMRContractDatabase {
 
     function createEMRStorage() public returns (bool) {
         //The database can build the EMRStorageContract
-        if(ownersToEMRStorage[msg.sender] != address(0)){
+        if(ownersToEMRStorage[msg.sender] != address(0x0)){
             revert("An EMRStorageContract already exists for this address");
         }
 

@@ -16,7 +16,7 @@ ethereum-waffle chai @nomiclabs/hardhat-ethers \
 web3modal @walletconnect/web3-provider \
 easymde react-markdown react-simplemde-editor \
 ipfs-http-client @emotion/css @openzeppelin/contracts \
-bootstrap react-bootstrap
+bootstrap react-bootstrap caver-js
 
 Once dependencies are installed, you can run the program on your local server from the root of the directory by using the command line function:
 

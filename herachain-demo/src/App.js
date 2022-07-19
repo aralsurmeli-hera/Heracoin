@@ -4,6 +4,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
+import caver from 'klaytn/caver'
 import { create } from 'ipfs-http-client'
 import React, { useState, useRef, useEffect, useContext } from 'react' // new
 import Web3Modal from 'web3modal'
@@ -13,11 +14,12 @@ import { AccountContext } from './context';
 import {
   databaseAddress, ownerAddress
 } from './config'
+
 import heralogo from './img/logo-hera.png'
 import metamasklogo from './img/logo-metamask.png'
 
 import EMRContractDatabase from './artifacts/contracts/EMRContractDatabase.sol/EMRContractDatabase.json'
-import EMRContract from './artifacts/contracts/EMRContract.sol/EMRContract.json'
+import EMRStorageContract from './artifacts/contracts/EMRStorageContract.sol/EMRStorageContract.json'
 
 import { Interface } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';

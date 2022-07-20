@@ -27,7 +27,7 @@ import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 import RecordComponent from './RecordComponent';
 
 //IPFS endpoint
-const client = create('https://ipfs.infura.io:5001/api/v0')
+const ipfs_client = caver.ipfs.setIPFSNode('https://ipfs.infura.io', 5001, true);
 
 //Initial Empty State of Medical Record
 const initialState = { description: '', recordType: '', recordDate: '' }
@@ -101,7 +101,7 @@ function App({ Component, pageProps }) {
   async function saveImageToIpfs() {
     /* save post metadata to ipfs */
     try {
-      const added = await client.add(file)
+      const added = await caver.ipfs.add(file)
       return added.path
     } catch (err) {
       console.log('Could not upload image: ', err)
@@ -111,7 +111,7 @@ function App({ Component, pageProps }) {
   async function saveDataToIpfs() {
     /* save post metadata to ipfs */
     try {
-      const added = await client.add(JSON.stringify(record.description))
+      const added = await caver.ipfs.add(JSON.stringify(record.description))
       return added.path
     } catch (err) {
       console.log('Could not upload Data: ', err)
@@ -170,7 +170,7 @@ function App({ Component, pageProps }) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
       console.log(signer)
-      const contract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
+      const contract = new caver.contract(EMRContractDatabase.abi, databaseAddress)
       console.log('contract: ', contract)
       try {
         const unixdate = convertToUnix(record.recordDate)

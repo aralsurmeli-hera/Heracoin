@@ -100,7 +100,7 @@ describe("EMR Storage Contract Tests", function () {
 
 
 
-    await storageContract.addRecord("test","test",100,101,"test","test");
+    await storageContract.addRecord("test", "test", 101, "test", "test");
     const record = await storageContract.getEMR(0);
 
     expect(record.record_type).to.equal("test");
@@ -109,7 +109,7 @@ describe("EMR Storage Contract Tests", function () {
 
   it("Should transfer heracoin to the EMR creator", async function () {
     const [owner, patient] = await ethers.getSigners();
-    
+
     const HeraCoin = await ethers.getContractFactory("HeraCoin");
     const heracoin = await HeraCoin.deploy();
     const heracoin_token = heracoin.deployed();
@@ -119,7 +119,7 @@ describe("EMR Storage Contract Tests", function () {
     const rewarder_address = await rewarder_contract.deployed();
 
     await heracoin.transfer(rewarder_address.address, 1000000000000000);
-    
+
 
     const EMRDatabase = await ethers.getContractFactory("EMRContractDatabase");
     const database = await EMRDatabase.deploy(rewarder_address.address);
@@ -134,7 +134,7 @@ describe("EMR Storage Contract Tests", function () {
 
 
 
-    await storageContract.connect(patient).addRecord("test","test",100,101,"test","test");
+    await storageContract.connect(patient).addRecord("test", "test", 101, "test", "test");
     patient_balance = await heracoin.balanceOf(patient.getAddress());
     contract_balance = await heracoin.balanceOf(rewarder_address.address);
 
@@ -156,7 +156,7 @@ describe("EMR Storage Contract Tests", function () {
     const rewarder_address = await rewarder_contract.deployed();
 
     await heracoin.transfer(rewarder_address.address, 1000000000000000);
-    
+
 
     const EMRDatabase = await ethers.getContractFactory("EMRContractDatabase");
     const database = await EMRDatabase.deploy(rewarder_address.address);
@@ -171,7 +171,7 @@ describe("EMR Storage Contract Tests", function () {
 
 
 
-    await expect(storageContract.connect(patient2).addRecord("test","test",100,101,"test","test")).to.be.reverted;
+    await expect(storageContract.connect(patient2).addRecord("test", "test", 101, "test", "test")).to.be.reverted;
 
   });
 
@@ -188,7 +188,7 @@ describe("EMR Storage Contract Tests", function () {
     const rewarder_address = await rewarder_contract.deployed();
 
     await heracoin.transfer(rewarder_address.address, 1000000000000000);
-    
+
 
     const EMRDatabase = await ethers.getContractFactory("EMRContractDatabase");
     const database = await EMRDatabase.deploy(rewarder_address.address);
@@ -200,13 +200,37 @@ describe("EMR Storage Contract Tests", function () {
     const storageAddress = await database_address.connect(patient).getEMRStorageContract();
     const storageContract = await storageFactory.attach(storageAddress);
 
-    await storageContract.connect(patient).addRecord("test","test",100,101,"test","test");
-    await storageContract.connect(patient).addRecord("test2","test2",102,103,"test2","test2");
+    await storageContract.connect(patient).addRecord("test", "test", 101, "test", "test");
+    await storageContract.connect(patient).addRecord("test2", "test2", 103, "test2", "test2");
 
     await storageContract.connect(patient).voidEMR(0);
 
     console.log(await storageContract.connect(patient).getEMR(1));
     console.log(await storageContract.connect(patient).getEMRIDs());
+  });
+
+  it("Should allow a patient to create a Record from the EMR Database Contract", async function () {
+    const [owner, patient] = await ethers.getSigners();
+
+    const HeraCoin = await ethers.getContractFactory("HeraCoin");
+    const heracoin = await HeraCoin.deploy();
+    const heracoin_token = heracoin.deployed();
+
+    const rewarder = await ethers.getContractFactory("HeraCoinRewarder");
+    const rewarder_contract = await rewarder.deploy((await heracoin_token).address);
+    const rewarder_address = await rewarder_contract.deployed();
+
+    await heracoin.transfer(rewarder_address.address, 1000000000000000);
+
+
+    const EMRDatabase = await ethers.getContractFactory("EMRContractDatabase");
+    const database = await EMRDatabase.deploy(rewarder_address.address);
+    const database_address = await database.deployed();
+
+    await database_address.connect(patient).createEMR("test", "test", 100, "test", "test");
+
+    console.log(await storageContract.connect(patient).getEMR(0));
+    expect(patient_balance).to.equal(100000000000000);
   });
 
 });

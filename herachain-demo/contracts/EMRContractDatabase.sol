@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./HeraCoinRewarder.sol";
-import "./EMRStorageContract.sol"; 
+import "./EMRStorageContract.sol";
 
 contract EMRContractDatabase {
     //Reward Contract
@@ -28,7 +28,7 @@ contract EMRContractDatabase {
 
     function createEMRStorage() public returns (bool) {
         //The database can build the EMRStorageContract
-        if(ownersToEMRStorage[msg.sender] != address(0x0)){
+        if (ownersToEMRStorage[msg.sender] != address(0x0)) {
             revert("An EMRStorageContract already exists for this address");
         }
 
@@ -44,48 +44,56 @@ contract EMRContractDatabase {
         return true;
     }
 
+    function createEMRStorageInternal(address add) internal returns (bool) {
+        //The database can build the EMRStorageContract
+        if (ownersToEMRStorage[add] != address(0x0)) {
+            revert("An EMRStorageContract already exists for this address");
+        }
+
+        EMRStorageContract new_emr_storage = new EMRStorageContract(this);
+
+        //Then transfer its ownership to the patient
+        new_emr_storage.transferOwnership(add);
+
+        //Maps the new EMRStorage to the Patient Address
+        ownersToEMRStorage[add] = address(new_emr_storage);
+
+        //Rewards the patient for creating an EMR using the Rewarder contract
+        return true;
+    }
+
     function sendRewardForEmrCreation(address patient) public {
         rewarder.sendRewardForEmrCreation(payable(patient));
     }
 
-    // function createEMR(
-    //     string memory _record_type,
-    //     string memory _record_status,
-    //     uint256 _record_date,
-    //     string memory _ipfs_image_hash,
-    //     string memory _ipfs_data_hash
-    // ) public returns (bool) {
-    //     //The database can build the EMRContract
-    //     EMRContract new_emr = new EMRContract(
-    //         _record_type,
-    //         _record_status,
-    //         _record_date,
-    //         _ipfs_image_hash,
-    //         _ipfs_data_hash
-    //     );
+    function createEMR(
+        string memory _record_type,
+        string memory _record_status,
+        uint256 _record_date,
+        string memory _ipfs_image_hash,
+        string memory _ipfs_data_hash
+    ) public returns (bool) {
+        //Check if an address exists for an EMR Storage contract for that patient
+        if (ownersToEMRStorage[msg.sender] == address(0x0)) {
+            createEMRStorageInternal(msg.sender);
+        }
 
-    //     //Then transfer its ownership to the patient
-    //     new_emr.transferOwnership(msg.sender);
+        //Then create a new record struct in the newly created contract
+        EMRStorageContract storageContract = EMRStorageContract(
+            ownersToEMRStorage[msg.sender]
+        );
+        storageContract.addRecordFromDatabase(
+            _record_type,
+            _record_status,
+            _record_date,
+            _ipfs_image_hash,
+            _ipfs_data_hash
+        );
 
-    //     uint256 newId = _EMRIds.current();
-    //     _EMRIds.increment();
+        return true;
+    }
 
-    //     idsToEMRs[newId] = new_emr;
-
-    //     //Maps the new EMR to the Patient Address
-    //     ownersToEMRs[msg.sender].push(newId);
-
-    //     //Emits the creation event to the blockchain
-    //     emit EMRCreated(msg.sender, newId);
-
-    //     //Rewards the patient for creating an EMR using the Rewarder contract
-    //     rewarder.sendRewardForEmrCreation(payable(msg.sender));
-    //     return true;
-    // }
-
-    
-
-    function getEMRStorageContract() public view returns (address){
+    function getEMRStorageContract() public view returns (address) {
         return ownersToEMRStorage[msg.sender];
     }
 }

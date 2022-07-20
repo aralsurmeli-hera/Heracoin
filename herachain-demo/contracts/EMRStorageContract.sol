@@ -26,17 +26,44 @@ contract EMRStorageContract is Ownable {
     mapping(uint256 => EMR) private emrs;
     uint256[] private emrIds;
 
-    EMRContractDatabase database;
+    EMRContractDatabase private database;
 
     constructor(EMRContractDatabase _database) {
-        database=_database;
+        database = _database;
+    }
+
+    modifier fromDatabase() {
+        require(msg.sender == address(database));
+        _;
+    }
+
+    function addRecordFromDatabase(
+        string memory _record_type,
+        string memory _record_status,
+        uint256 _record_date,
+        string memory _ipfs_image_hash,
+        string memory _ipfs_data_hash
+    ) public fromDatabase {
+        uint256 _recordId = emrIdCounter.current();
+        emrs[_recordId] = EMR(
+            _record_type,
+            _record_status,
+            _record_date,
+            block.timestamp,
+            _ipfs_image_hash,
+            _ipfs_data_hash
+        );
+        emrIdCounter.increment();
+        emrIds.push(_recordId);
+        database.sendRewardForEmrCreation(owner());
+
+        emit EMRCreated(owner(), _recordId);
     }
 
     function addRecord(
         string memory _record_type,
         string memory _record_status,
-        uint256  _record_date,
-        uint256  _publish_date,
+        uint256 _record_date,
         string memory _ipfs_image_hash,
         string memory _ipfs_data_hash
     ) public onlyOwner {
@@ -45,14 +72,13 @@ contract EMRStorageContract is Ownable {
             _record_type,
             _record_status,
             _record_date,
-            _publish_date,
+            block.timestamp,
             _ipfs_image_hash,
             _ipfs_data_hash
-
         );
         emrIdCounter.increment();
         emrIds.push(_recordId);
-        database.sendRewardForEmrCreation(msg.sender);
+        database.sendRewardForEmrCreation(owner());
 
         emit EMRCreated(owner(), _recordId);
     }
@@ -65,15 +91,18 @@ contract EMRStorageContract is Ownable {
                 emrIds.pop();
                 break;
             }
-        }    
+        }
     }
 
-    function getEMR(uint256 _emrID) public view onlyOwner returns(EMR memory) {
+    function getEMR(uint256 _emrID) public view onlyOwner returns (EMR memory) {
         return emrs[_emrID];
     }
 
-    function getEMRIDs() public view onlyOwner returns(uint256[] memory){
+    function getEMRIDs() public view onlyOwner returns (uint256[] memory) {
         return emrIds;
     }
 
+    function setDatabaseAddress(EMRContractDatabase db) public onlyOwner {
+        database = db;
+    }
 }

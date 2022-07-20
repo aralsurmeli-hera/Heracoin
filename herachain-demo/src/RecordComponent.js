@@ -1,5 +1,6 @@
 import { Record } from './App.js';
 import { ethers } from 'ethers'
+import caver from 'klaytn/caver'
 import { create, get } from 'ipfs-http-client'
 import { useState, useRef, useEffect } from 'react' // new
 // import { useRouter } from 'next/router'

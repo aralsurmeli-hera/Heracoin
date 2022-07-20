@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/contracts/EMRContractDatabase.sol": {
-      "lastModificationDate": 1658169688086,
-      "contentHash": "c1bdd0d7bee324dc73bc108130d7207a",
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/contracts/EMRContractDatabase.sol": {
+      "lastModificationDate": 1658283970347,
+      "contentHash": "17fb1b144d9e2b16a59e59c701a55b70",
       "sourceName": "contracts/EMRContractDatabase.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -42,8 +42,8 @@
         "EMRContractDatabase"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
-      "lastModificationDate": 1658169518524,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1658194253447,
       "contentHash": "e6ef731d275b1e7b2995f00fa56d9dab",
       "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
       "solcConfig": {
@@ -82,8 +82,8 @@
         "AccessControl"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
-      "lastModificationDate": 1658169519299,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1658194256324,
       "contentHash": "e436cea06129be2c73cda4b1acc848b5",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
@@ -119,8 +119,8 @@
         "Ownable"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
-      "lastModificationDate": 1658169518616,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
+      "lastModificationDate": 1658194253781,
       "contentHash": "74654e3ae5d7f39555055dfe244dab7a",
       "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
       "solcConfig": {
@@ -154,8 +154,8 @@
         "Counters"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/contracts/HeraCoinRewarder.sol": {
-      "lastModificationDate": 1657159353446,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/contracts/HeraCoinRewarder.sol": {
+      "lastModificationDate": 1658192931660,
       "contentHash": "b5b2862a57b2bc6a52359cbe961a3041",
       "sourceName": "contracts/HeraCoinRewarder.sol",
       "solcConfig": {
@@ -192,9 +192,9 @@
         "HeraCoinRewarder"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/contracts/EMRStorageContract.sol": {
-      "lastModificationDate": 1658172232346,
-      "contentHash": "09da0cf30fa4627adfc6d5ddd4ea5e4b",
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/contracts/EMRStorageContract.sol": {
+      "lastModificationDate": 1658283938271,
+      "contentHash": "bc178cdb5e53ad964026c9e43e66b69a",
       "sourceName": "contracts/EMRStorageContract.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -232,8 +232,8 @@
         "EMRStorageContract"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/IAccessControl.sol": {
-      "lastModificationDate": 1658169519107,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1658194255257,
       "contentHash": "57c84298234411cea19c7c284d86be8b",
       "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
       "solcConfig": {
@@ -267,8 +267,8 @@
         "IAccessControl"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Context.sol": {
-      "lastModificationDate": 1658169518607,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Context.sol": {
+      "lastModificationDate": 1658194253770,
       "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
@@ -302,8 +302,8 @@
         "Context"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
-      "lastModificationDate": 1658169519362,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1658194256510,
       "contentHash": "cf46906c4035f51639a22265066a9e78",
       "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
       "solcConfig": {
@@ -337,8 +337,8 @@
         "Strings"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol": {
-      "lastModificationDate": 1658169518869,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1658194254429,
       "contentHash": "0e7db055ce108f9da7bb6686a00287c0",
       "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
       "solcConfig": {
@@ -374,8 +374,8 @@
         "ERC165"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
-      "lastModificationDate": 1658169519193,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1658194255535,
       "contentHash": "03e6768535ac4da0e9756f1d8a4a018a",
       "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
       "solcConfig": {
@@ -409,8 +409,8 @@
         "IERC165"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
-      "lastModificationDate": 1658169519205,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1658194255612,
       "contentHash": "ad7c2d0af148c8f9f097d65deeb4da6b",
       "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
       "solcConfig": {
@@ -444,8 +444,8 @@
         "IERC20"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/contracts/HeraCoin.sol": {
-      "lastModificationDate": 1657159353446,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/contracts/HeraCoin.sol": {
+      "lastModificationDate": 1658192931660,
       "contentHash": "e81aac8e3c20e732dd055d1beeae7bf7",
       "sourceName": "contracts/HeraCoin.sol",
       "solcConfig": {
@@ -482,8 +482,8 @@
         "HeraCoin"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {
-      "lastModificationDate": 1658169518902,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {
+      "lastModificationDate": 1658194254555,
       "contentHash": "af7bd64e1cfefbf6cb07f2adc1a25392",
       "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
@@ -521,8 +521,8 @@
         "ERC20"
       ]
     },
-    "/Users/austin/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
-      "lastModificationDate": 1658169519209,
+    "/Users/austinhatch/Documents/GitHub/Heracoin/herachain-demo/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "lastModificationDate": 1658194255621,
       "contentHash": "909ab67fc5c25033fe6cd364f8c056f9",
       "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
       "solcConfig": {

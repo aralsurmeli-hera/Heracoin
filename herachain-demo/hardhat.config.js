@@ -22,7 +22,7 @@ const KOVAN_RPC_URL =
 const POLYGON_MAINNET_RPC_URL =
   process.env.POLYGON_MAINNET_RPC_URL ||
   'https://polygon-mainnet.alchemyapi.io/v2/your-api-key';
-const KLAYTN_BOABAB_RPC_URL = 
+const KLAYTN_BOABAB_RPC_URL =
   process.env.KLAYTN_BOABAB_RPC_URL || 'https://api.baobab.klaytn.net:8651/';
 
 
@@ -119,7 +119,7 @@ module.exports = {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
-    artifacts: ".src/artifacts"
+    artifacts: "./src/artifacts"
   },
   mocha: {
     timeout: 200000, // 200 seconds max for running tests

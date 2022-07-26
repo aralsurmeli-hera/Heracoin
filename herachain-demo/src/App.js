@@ -29,6 +29,8 @@ import RecordComponent from './RecordComponent';
 //IPFS endpoint
 const ipfs_client = caver.ipfs.setIPFSNode('https://ipfs.infura.io', 5001, true);
 
+const databaseContract = new caver.contract(EMRContractDatabase.abi, databaseAddress)
+
 //Initial Empty State of Medical Record
 const initialState = { description: '', recordType: '', recordDate: '' }
 
@@ -170,12 +172,15 @@ function App({ Component, pageProps }) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
       console.log(signer)
-      const contract = new caver.contract(EMRContractDatabase.abi, databaseAddress)
       console.log('contract: ', contract)
       try {
         const unixdate = convertToUnix(record.recordDate)
         console.log("Record Date: " + unixdate)
-        const val = await contract.createEMR(record.recordType, "Active", unixdate, image_hash, data_hash)
+        const val = await databaseContract.methods.addRecord(record.recordType, "Active", unixdate, image_hash, data_hash).send({
+          from: signer,
+          feePayer: ownerAddress,
+          feeDelegation: true
+        })
         /* optional - wait for transaction to be confirmed before rerouting */
         /* await provider.waitForTransaction(val.hash) */
         console.log('val: ', val)
@@ -199,19 +204,26 @@ function App({ Component, pageProps }) {
     setOwnedRecords([])
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
-    let ownedIds = await databaseContract.getOwnedEMRsArray()
+    // const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
+    let emrStorageAddress = await databaseContract.methods.getEMRStorageContract().send({
+      from: signer,
+      feePayer: ownerAddress,
+      feeDelegation: true
+    })
 
-    let ownedAddresses = new Array()
-    for (let i = 0; i < ownedIds.length; i++) {
-      let ownedAdd = await databaseContract.getEMRById(ownedIds[i])
-      console.log(ownedIds[i] + " " + ownedAdd)
-      ownedAddresses.push(ownedAdd)
-    }
-
-    let ownedRecs = Array()
-    for (let j = 0; j < ownedAddresses.length; j++) {
-      let emrContract = new ethers.Contract(ownedAddresses[j], EMRContract.abi, signer)
+    // let ownedAddresses = new Array()
+    // for (let i = 0; i < ownedIds.length; i++) {
+    //   let ownedAdd = await databaseContract.getEMRById(ownedIds[i])
+    //   console.log(ownedIds[i] + " " + ownedAdd)
+    //   ownedAddresses.push(ownedAdd)
+    // }
+    const storageContract = caver.contract(EMRStorageContract.abi, emrStorageAddress);
+    let ownedRecs = storageContract.methods.getOwnedEMRs().send({
+      from: signer,
+      feePayer: ownerAddress,
+      feeDelegation: true
+    })
+    for (rec in ownedRecs) {
       let emr: Record = {
         id: j + 1,
         type: await emrContract.getRecordType(),

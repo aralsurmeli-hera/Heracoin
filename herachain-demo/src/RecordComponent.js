@@ -1,6 +1,8 @@
 import { Record } from './App.js';
 import { ethers } from 'ethers'
-import caver from 'klaytn/caver'
+// import Web3 from 'web3'
+import Caver from 'caver-js'
+
 import { create, get } from 'ipfs-http-client'
 import { useState, useRef, useEffect } from 'react' // new
 // import { useRouter } from 'next/router'
@@ -17,11 +19,22 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 
 import EMRContractDatabase from './artifacts/contracts/EMRContractDatabase.sol/EMRContractDatabase.json'
-import EMRContract from './artifacts/contracts/EMRContract.sol/EMRContract.json'
+import EMRStorageContract from './artifacts/contracts/EMRStorageContract.sol/EMRStorageContract.json'
 
 import { Interface } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import AccordionItem from 'react-bootstrap/esm/AccordionItem.js';
+
+
+
+// const ROPSTEN_TESTNET_RPC_URL = 'https://ropsten.infura.io/'
+const BAOBAB_TESTNET_RPC_URL = 'https://api.baobab.klaytn.net:8651/'
+
+// const rpcURL = ROPSTEN_TESTNET_RPC_URL
+const rpcURL = BAOBAB_TESTNET_RPC_URL
+
+// const web3 = new Web3(rpcURL)
+const caver = new Caver(rpcURL)
 
 export default function RecordComponent(props) {
     const [recordDate, setRecordDate] = useState()

@@ -4,7 +4,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
-import caver from 'klaytn/caver'
+import Caver from 'caver-js'
 import { create } from 'ipfs-http-client'
 import React, { useState, useRef, useEffect, useContext } from 'react' // new
 import Web3Modal from 'web3modal'
@@ -25,6 +25,15 @@ import { Interface } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 import RecordComponent from './RecordComponent';
+
+// const ROPSTEN_TESTNET_RPC_URL = 'https://ropsten.infura.io/'
+const BAOBAB_TESTNET_RPC_URL = 'https://api.baobab.klaytn.net:8651/'
+
+// const rpcURL = ROPSTEN_TESTNET_RPC_URL
+const rpcURL = BAOBAB_TESTNET_RPC_URL
+
+// const web3 = new Web3(rpcURL)
+const caver = new Caver(rpcURL)
 
 //IPFS endpoint
 const ipfs_client = caver.ipfs.setIPFSNode('https://ipfs.infura.io', 5001, true);
@@ -172,7 +181,7 @@ function App({ Component, pageProps }) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
       console.log(signer)
-      console.log('contract: ', contract)
+      console.log('contract: ', databaseAddress)
       try {
         const unixdate = convertToUnix(record.recordDate)
         console.log("Record Date: " + unixdate)
@@ -218,18 +227,19 @@ function App({ Component, pageProps }) {
     //   ownedAddresses.push(ownedAdd)
     // }
     const storageContract = caver.contract(EMRStorageContract.abi, emrStorageAddress);
-    let ownedRecs = storageContract.methods.getOwnedEMRs().send({
+    let ownedRecs = await storageContract.methods.getOwnedEMRs().send({
       from: signer,
       feePayer: ownerAddress,
       feeDelegation: true
     })
-    for (rec in ownedRecs) {
+    for (let j = 0; j < ownedRecs.length; j++) {
+      var rec = ownedRecs[j];
       let emr: Record = {
         id: j + 1,
-        type: await emrContract.getRecordType(),
-        date: await emrContract.getRecordDate(),
-        image_hash: await emrContract.getImageIPFSHash(),
-        data_hash: await emrContract.getDataIPFSHash()
+        type: rec.record_type,
+        date: rec.record_date,
+        image_hash: rec.ipfs_image_hash,
+        data_hash: rec.ipfs_data_hash
       }
       setOwnedRecords(ownedRecords => [...ownedRecords, emr]);
     }

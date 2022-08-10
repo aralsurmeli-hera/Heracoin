@@ -5,6 +5,7 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
 import Caver from 'caver-js'
+import { KaikasWeb3Provider } from "@klaytn/kaikas-web3-provider"
 import { create } from 'ipfs-http-client'
 import React, { useState, useRef, useEffect, useContext } from 'react' // new
 import Web3Modal from 'web3modal'
@@ -36,9 +37,9 @@ const rpcURL = BAOBAB_TESTNET_RPC_URL
 const caver = new Caver(rpcURL)
 
 //IPFS endpoint
-const ipfs_client = caver.ipfs.setIPFSNode('https://ipfs.infura.io', 5001, true);
+const client = create('https://ipfs.infura.io:5001/api/v0')
 
-const databaseContract = new caver.contract(EMRContractDatabase.abi, databaseAddress)
+const databaseContract = new caver.contract.create(EMRContractDatabase.abi, databaseAddress)
 
 //Initial Empty State of Medical Record
 const initialState = { description: '', recordType: '', recordDate: '' }
@@ -60,8 +61,8 @@ function App({ Component, pageProps }) {
   const { description, recordType, recordDate } = record
   const [ownedRecords, setOwnedRecords] = useState([])
   let rows = []
+  const [provider, setProvider] = useState(null)
 
-  // const router = useRouter()
   const fileRef = useRef(null)
 
   const [loaded, setLoaded] = useState(false)
@@ -82,17 +83,24 @@ function App({ Component, pageProps }) {
   async function getWeb3Modal() {
     const web3Modal = new Web3Modal({
       cacheProvider: false,
+      network: "boabab",
       providerOptions: {
         walletconnect: {
           package: WalletConnectProvider,
           options: {
             infuraId: "your-infura-id"
           },
+          kaikas: {
+            package: KaikasWeb3Provider,
+          }
         },
       },
     })
+    console.log(web3Modal)
     return web3Modal
   }
+
+
 
   /* the connect function uses web3 modal to connect to the user's wallet */
   async function connect() {
@@ -101,18 +109,23 @@ function App({ Component, pageProps }) {
       const connection = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(connection)
       const accounts = await provider.listAccounts()
+      console.log(accounts)
       setAccount(accounts[0])
+      console.log(account)
       console.log(provider)
+      setProvider(provider)
       getOwnedRecords()
     } catch (err) {
       console.log('error:', err)
     }
   }
 
+
+
   async function saveImageToIpfs() {
     /* save post metadata to ipfs */
     try {
-      const added = await caver.ipfs.add(file)
+      const added = await client.add(file)
       return added.path
     } catch (err) {
       console.log('Could not upload image: ', err)
@@ -122,7 +135,7 @@ function App({ Component, pageProps }) {
   async function saveDataToIpfs() {
     /* save post metadata to ipfs */
     try {
-      const added = await caver.ipfs.add(JSON.stringify(record.description))
+      const added = await client.add(JSON.stringify(record.description))
       return added.path
     } catch (err) {
       console.log('Could not upload Data: ', err)
@@ -171,27 +184,26 @@ function App({ Component, pageProps }) {
     setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
     document.getElementById("form").reset();
     setFile(null)
-    // router.push(`/`)
   }
 
 
 
   async function createEMR(image_hash, data_hash) {
     if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
       console.log(signer)
       console.log('contract: ', databaseAddress)
+      console.log('signer: ', account)
       try {
         const unixdate = convertToUnix(record.recordDate)
         console.log("Record Date: " + unixdate)
-        const val = await databaseContract.methods.addRecord(record.recordType, "Active", unixdate, image_hash, data_hash).send({
-          from: signer,
+        const val = await databaseContract.methods.createEMR(record.recordType, "Active", unixdate, image_hash, data_hash).send({
+          from: account,
           feePayer: ownerAddress,
-          feeDelegation: true
+          feeDelegation: true,
+          gas: 300000000,
         })
-        /* optional - wait for transaction to be confirmed before rerouting */
-        /* await provider.waitForTransaction(val.hash) */
+
         console.log('val: ', val)
         return true;
       } catch (err) {
@@ -210,28 +222,27 @@ function App({ Component, pageProps }) {
 
   async function getOwnedRecords() {
     console.log("Getting owned EMRs")
+    console.log("Database: " + databaseContract.options.address)
     setOwnedRecords([])
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const web3Modal = await getWeb3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    console.log(provider.getSigner())
+    // const signer = new caver.account(provider.getSigner())
     const signer = provider.getSigner()
     // const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
-    let emrStorageAddress = await databaseContract.methods.getEMRStorageContract().send({
-      from: signer,
+    await databaseContract.methods.createEMRStorage().send({
+      from: account,
       feePayer: ownerAddress,
-      feeDelegation: true
+      feeDelegation: true,
+      gas: 300000000,
     })
 
-    // let ownedAddresses = new Array()
-    // for (let i = 0; i < ownedIds.length; i++) {
-    //   let ownedAdd = await databaseContract.getEMRById(ownedIds[i])
-    //   console.log(ownedIds[i] + " " + ownedAdd)
-    //   ownedAddresses.push(ownedAdd)
-    // }
-    const storageContract = caver.contract(EMRStorageContract.abi, emrStorageAddress);
-    let ownedRecs = await storageContract.methods.getOwnedEMRs().send({
-      from: signer,
-      feePayer: ownerAddress,
-      feeDelegation: true
-    })
+    let emrStorageAddress = await databaseContract.methods.getEMRStorageContract().call()
+    console.log("Storage: " + emrStorageAddress)
+
+    const storageContract = new caver.contract(EMRStorageContract.abi, emrStorageAddress);
+    let ownedRecs = await storageContract.methods.getEMRIDs()
     for (let j = 0; j < ownedRecs.length; j++) {
       var rec = ownedRecs[j];
       let emr: Record = {

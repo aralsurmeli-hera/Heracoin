@@ -2542,6 +2542,18 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@klaytn/kaikas-web3-provider@^1.0.2":
+  "integrity" "sha512-TTMTjhk13mWS51FHml0Bvf/f6yC9scb5EFEJubmIYHIAs3acz2+RhuV4P8gt3EuQ8S91K2bxme/3CLorYKoOFg=="
+  "resolved" "https://registry.npmjs.org/@klaytn/kaikas-web3-provider/-/kaikas-web3-provider-1.0.2.tgz"
+  "version" "1.0.2"
+  dependencies:
+    "@metamask/safe-event-emitter" "^2.0.0"
+    "caver-js" "^1.9.0"
+    "eth-block-tracker" "4.4.3"
+    "eth-json-rpc-filters" "4.2.2"
+    "eth-rpc-errors" "4.0.2"
+    "json-rpc-engine" "6.1.0"
+
 "@metamask/eth-sig-util@^4.0.0":
   "integrity" "sha512-tghyZKLHZjcdlDqCA3gNZmLeR0XvOE9U1qoQO9ohyAZT6Pya+H9vkBPcsyXytmYLNgVoin7CKCmweo/R43V+tQ=="
   "resolved" "https://registry.npmjs.org/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz"
@@ -7268,14 +7280,7 @@
   "resolved" "https://registry.npmjs.org/decode-uri-component/-/decode-uri-component-0.2.0.tgz"
   "version" "0.2.0"
 
-"decompress-response@^3.2.0":
-  "integrity" "sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M="
-  "resolved" "https://registry.npmjs.org/decompress-response/-/decompress-response-3.3.0.tgz"
-  "version" "3.3.0"
-  dependencies:
-    "mimic-response" "^1.0.0"
-
-"decompress-response@^3.3.0":
+"decompress-response@^3.2.0", "decompress-response@^3.3.0":
   "integrity" "sha512-BzRPQuY1ip+qDonAOz42gRm/pg9F768C+npV/4JOsxRC2sq+Rlk+Q4ZCAsOhnIaMrgarILY+RMUIvMmmX1qAEA=="
   "resolved" "https://registry.npmjs.org/decompress-response/-/decompress-response-3.3.0.tgz"
   "version" "3.3.0"
@@ -8364,7 +8369,7 @@
     "pify" "^2.3.0"
     "tape" "^4.6.3"
 
-"eth-block-tracker@^4.4.2":
+"eth-block-tracker@^4.4.2", "eth-block-tracker@4.4.3":
   "integrity" "sha512-A8tG4Z4iNg4mw5tP1Vung9N9IjgMNqpiMoJ/FouSFwNCGHv2X0mmOYwtQOJzki6XN7r7Tyo01S29p7b224I4jw=="
   "resolved" "https://registry.npmjs.org/eth-block-tracker/-/eth-block-tracker-4.4.3.tgz"
   "version" "4.4.3"
@@ -8392,7 +8397,7 @@
     "idna-uts46-hx" "^2.3.1"
     "js-sha3" "^0.5.7"
 
-"eth-json-rpc-filters@^4.2.1":
+"eth-json-rpc-filters@^4.2.1", "eth-json-rpc-filters@4.2.2":
   "integrity" "sha512-DGtqpLU7bBg63wPMWg1sCpkKCf57dJ+hj/k3zF26anXMzkmtSBDExL8IhUu7LUd34f0Zsce3PYNO2vV2GaTzaw=="
   "resolved" "https://registry.npmjs.org/eth-json-rpc-filters/-/eth-json-rpc-filters-4.2.2.tgz"
   "version" "4.2.2"
@@ -8500,6 +8505,13 @@
   "integrity" "sha512-Z3ymjopaoft7JDoxZcEb3pwdGh7yiYMhOwm2doUt6ASXlMavpNlK6Cre0+IMl2VSGyEU9rkiperQhp5iRxn5Pg=="
   "resolved" "https://registry.npmjs.org/eth-rpc-errors/-/eth-rpc-errors-4.0.3.tgz"
   "version" "4.0.3"
+  dependencies:
+    "fast-safe-stringify" "^2.0.6"
+
+"eth-rpc-errors@4.0.2":
+  "integrity" "sha512-n+Re6Gu8XGyfFy1it0AwbD1x0MUzspQs0D5UiPs1fFPCr6WAwZM+vbIhXheBFrpgosqN9bs5PqlB4Q61U/QytQ=="
+  "resolved" "https://registry.npmjs.org/eth-rpc-errors/-/eth-rpc-errors-4.0.2.tgz"
+  "version" "4.0.2"
   dependencies:
     "fast-safe-stringify" "^2.0.6"
 
@@ -12261,7 +12273,7 @@
     "eth-rpc-errors" "^3.0.0"
     "safe-event-emitter" "^1.0.1"
 
-"json-rpc-engine@^6.1.0":
+"json-rpc-engine@^6.1.0", "json-rpc-engine@6.1.0":
   "integrity" "sha512-NEdLrtrq1jUZyfjkr9OCz9EzCNhnRyWtt1PAnvnhwy6e8XETS0Dtc+ZNCO2gvuAoKsIn2+vCSowXTYE4CkgnAQ=="
   "resolved" "https://registry.npmjs.org/json-rpc-engine/-/json-rpc-engine-6.1.0.tgz"
   "version" "6.1.0"
@@ -18502,12 +18514,7 @@
   "resolved" "https://registry.npmjs.org/thunky/-/thunky-1.1.0.tgz"
   "version" "1.1.0"
 
-"timed-out@^4.0.0":
-  "integrity" "sha1-8y6srFoXW+ol1/q1Zas+2HQe9W8="
-  "resolved" "https://registry.npmjs.org/timed-out/-/timed-out-4.0.1.tgz"
-  "version" "4.0.1"
-
-"timed-out@^4.0.1":
+"timed-out@^4.0.0", "timed-out@^4.0.1":
   "integrity" "sha512-G7r3AhovYtr5YKOWQkta8RKAPb+J9IsO4uVmzjl8AZwfhs8UcUwTiD6gcJYSgOtzyjvQKrKYn41syHbUWMkafA=="
   "resolved" "https://registry.npmjs.org/timed-out/-/timed-out-4.0.1.tgz"
   "version" "4.0.1"

@@ -42,7 +42,8 @@ export default function RecordComponent(props) {
     const [recordDescription, setRecordDescription] = useState()
     const [recordImage, setRecordImage] = useState()
     const recordId = props.id
-    const ipfsURI = 'https://ipfs.io/ipfs/'
+    const recordNum = props.num
+    const ipfsURI = 'https://heradigitalhealth.infura-ipfs.io/ipfs'
 
 
 
@@ -76,13 +77,22 @@ export default function RecordComponent(props) {
         setRecordDescription(data)
 
         const imageUrl = `${ipfsURI}/${props.image_hash}`
+        console.log(imageUrl)
         setRecordImage(imageUrl)
+    }
 
+    async function removeRecord() {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
+        const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
+        let emrStorageAddress = await databaseContract.getEMRStorageContract()
+        const storageContract = new ethers.Contract(emrStorageAddress, EMRStorageContract.abi, signer);
+        await storageContract.voidEMR(recordId)
     }
 
     return (
         <tr>
-            <th scope="row" name="id">{recordId}</th>
+            <th scope="row" name="num">{recordNum}</th>
             <td name="date">{recordDate}</td>
             <td name="type"> {recordType} </td>
             <td name="description">{recordDescription}</td>
@@ -97,21 +107,10 @@ export default function RecordComponent(props) {
                         </Accordion.Item>
                     </Accordion>
                 </div>
-                {/* <div className="accordion" id="accordionExample">
-                    <div className="accordion-item">
-                        <h2 className="accordion-header" id="headingOne">
-                            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapseOne">
-                                View File
-                            </button>
-                        </h2>
-                        <div id="collapse1" className="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                            <div className="accordion-body">
-                                <img className="recordImage" src={recordImage} />
-                            </div>
-                        </div>
-                    </div >
-                </div > */}
             </td >
+            <td>
+                <Button className="removeRecord" onClick={removeRecord}>X</Button>
+            </td>
         </tr >
 
     )

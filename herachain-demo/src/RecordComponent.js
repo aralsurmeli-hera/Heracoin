@@ -1,18 +1,13 @@
 import { Record } from './App.js';
 import { ethers } from 'ethers'
-// import Web3 from 'web3'
 import Caver from 'caver-js'
-
+import App from './App.js'
 import { create, get } from 'ipfs-http-client'
 import { useState, useRef, useEffect } from 'react' // new
-// import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { AccountContext } from './context';
-// import emr from './emr.js'
-import {
-    databaseAddress, ownerAddress
-} from './config'
+import { databaseAddress, ownerAddress } from './config'
 import 'bootstrap/dist/css/bootstrap.css';
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
@@ -26,15 +21,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import AccordionItem from 'react-bootstrap/esm/AccordionItem.js';
 
 
-
-// const ROPSTEN_TESTNET_RPC_URL = 'https://ropsten.infura.io/'
 const BAOBAB_TESTNET_RPC_URL = 'https://api.baobab.klaytn.net:8651/'
-
-// const rpcURL = ROPSTEN_TESTNET_RPC_URL
-const rpcURL = BAOBAB_TESTNET_RPC_URL
-
-// const web3 = new Web3(rpcURL)
-const caver = new Caver(rpcURL)
+const caver = new Caver(BAOBAB_TESTNET_RPC_URL)
 
 export default function RecordComponent(props) {
     const [recordDate, setRecordDate] = useState()
@@ -48,9 +36,6 @@ export default function RecordComponent(props) {
 
 
     useEffect(() => {
-        console.log("Converting Date")
-        console.log(props.date)
-        console.log(props.type)
         setRecordDate(convertToDate(props.date))
         setRecordType(props.type)
         getStaticProps()
@@ -98,7 +83,7 @@ export default function RecordComponent(props) {
             <td name="description">{recordDescription}</td>
             <td>
                 <div>
-                    <Accordion defaultActiveKey="0">
+                    <Accordion defaultActiveKey="1">
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>View Record</Accordion.Header>
                             <Accordion.Body>

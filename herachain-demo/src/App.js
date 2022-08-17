@@ -1,17 +1,19 @@
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.css';
-import Accordion from 'react-bootstrap/Accordion';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
-import { create } from 'ipfs-http-client'
-import React, { useState, useRef, useEffect, useContext } from 'react' // new
+import Caver from 'caver-js'
+import { create as ipfsHttpClient } from 'ipfs-http-client'
+
+import React, { useState, useRef, useEffect, useContext } from 'react'
+import 'bootstrap/dist/css/bootstrap.css';
+
+
 import { KaikasWeb3Provider } from "@klaytn/kaikas-web3-provider"
 
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { AccountContext } from './context';
 import { databaseAddress, ownerAddress } from './config'
+
 import heralogo from './img/logo-hera.png'
 import metamasklogo from './img/logo-metamask.png'
 
@@ -20,22 +22,21 @@ import EMRStorageContract from './artifacts/contracts/EMRStorageContract.sol/EMR
 
 import { Interface } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 import RecordComponent from './RecordComponent';
 
 
 const BAOBAB_TESTNET_RPC_URL = 'https://api.baobab.klaytn.net:8651/'
+const caver = new Caver(BAOBAB_TESTNET_RPC_URL)
+
 
 //IPFS endpoint
-const ipfsClient = require('ipfs-http-client')
 const projectId = '2DBkdZ0RLVleEQgaqcR5VNoaO4d'
 const projectSecret = 'aebbd2d6d63d774c249c32d27c2bb4c4'
 const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-const client = ipfsClient.create({
+const client = ipfsHttpClient({
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
-    apiPath: '/api/v0',
     headers: {
         authorization: auth,
     },
@@ -63,7 +64,6 @@ function App({ Component, pageProps }) {
     const [ownedRecords, setOwnedRecords] = useState([])
     const [provider, setProvider] = useState(null)
     const [loaded, setLoaded] = useState(false)
-
 
     function onChange(e) {
         setRecord(() => ({ ...record, [e.target.name]: e.target.value }))
@@ -95,8 +95,6 @@ function App({ Component, pageProps }) {
                 },
             },
         })
-        console.log(web3Modal)
-
         return web3Modal
     }
 
@@ -144,10 +142,8 @@ function App({ Component, pageProps }) {
             const web3Modal = await getWeb3Modal()
             const connection = await web3Modal.connect()
             const provider = new ethers.providers.Web3Provider(connection)
-            setProvider(provider)
             const accounts = await provider.listAccounts()
             setAccount(accounts[0])
-            console.log(provider)
             getOwnedRecords()
         } catch (err) {
             console.log('error:', err)
@@ -177,7 +173,6 @@ function App({ Component, pageProps }) {
     const convertToUnix = (date) => {
         const dateFormat = new Date(date);
         let unixTimestamp = Math.floor(dateFormat.getTime() / 1000)
-        // console.log(unixTimestamp)
         return unixTimestamp
     }
 
@@ -207,6 +202,10 @@ function App({ Component, pageProps }) {
         console.log("Image has been saved to " + image_hash)
         const data_hash = await saveDataToIpfs()
         console.log("Data has been saved to " + data_hash)
+        if (image_hash == undefined) {
+            alert("Unable to upload files. Please check your IPFS connection.")
+            return
+        }
         var success = await createEMR(image_hash, data_hash)
         if (!success) {
             alert("Unable to create an EMR on the blockchain. Please check that you have connected your wallet.")
@@ -216,6 +215,7 @@ function App({ Component, pageProps }) {
         setRecord(() => ({ description: '', recordType: '', recordDate: '' }))
         document.getElementById("form").reset();
         setFile(null)
+        await getOwnedRecords()
     }
 
 
@@ -231,8 +231,6 @@ function App({ Component, pageProps }) {
                 const unixdate = convertToUnix(record.recordDate)
                 console.log("Record Date: " + unixdate)
                 const val = await contract.createEMR(record.recordType, "Active", unixdate, image_hash, data_hash)
-                /* optional - wait for transaction to be confirmed before rerouting */
-                /* await provider.waitForTransaction(val.hash) */
                 console.log('val: ', val)
                 return true;
             } catch (err) {
@@ -246,10 +244,9 @@ function App({ Component, pageProps }) {
 
     function onFormChange(e) {
         setRecord(() => ({ ...record, [e.target.name]: e.target.value }))
-        console.log(record)
     }
 
-    async function getOwnedRecords() {
+    const getOwnedRecords = async () => {
         console.log("Getting owned EMRs")
         setOwnedRecords([])
         const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -274,8 +271,9 @@ function App({ Component, pageProps }) {
         console.log(ownedRecords)
     }
 
-    const afterSubmission = (event) => {
+    const afterSubmission = async (event) => {
         event.preventDefault();
+
     }
 
     useEffect(() => {
@@ -283,15 +281,6 @@ function App({ Component, pageProps }) {
             await getOwnedRecords()
         }
     }, [])
-
-    async function removeRecord(id) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const signer = provider.getSigner()
-        const databaseContract = new ethers.Contract(databaseAddress, EMRContractDatabase.abi, signer)
-        let emrStorageAddress = await databaseContract.getEMRStorageContract()
-        const storageContract = new ethers.Contract(emrStorageAddress, EMRStorageContract.abi, signer);
-        await storageContract.voidEMR(id)
-    }
 
     return (
         <><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" /><div className="container">
@@ -343,8 +332,8 @@ function App({ Component, pageProps }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {ownedRecords.map(function (record, i) {
-                            return <RecordComponent {...record} record={record} key={i}></RecordComponent>
+                        {ownedRecords.map(function (record, key) {
+                            return <RecordComponent key={key} id={record.id} num={record.num} type={record.type} image_hash={record.image_hash} data_hash={record.data_hash} date={record.date} refresh={getOwnedRecords}></RecordComponent>
                         })}
                         { }
                     </tbody>
